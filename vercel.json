@@ -1,8 +1,4 @@
 {
-<<<<<<< HEAD
-  "installCommand": "bun install"
-=======
   "installCommand": "bun install",
   "buildCommand": "bun run build"
->>>>>>> a0a3a1d (Update project configuration for Vercel deployment)
 }
