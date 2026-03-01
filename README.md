@@ -13,7 +13,7 @@ El proyecto está funcional para producción a nivel de aplicación:
 
 ## Stack
 
-- Astro 5 (`output: "server"`) + `@astrojs/node` (`standalone`)
+- Astro 5 (`output: "server"`) + `@astrojs/vercel`
 - React 19 (islas para UI interactiva)
 - Tailwind CSS 4 + componentes UI
 - Prometheus como fuente de datos
@@ -68,11 +68,7 @@ Compilar:
 bun run build
 ```
 
-Ejecutar servidor generado (Node adapter standalone):
-
-```bash
-node dist/server/entry.mjs
-```
+Desplegar en Vercel (adapter `@astrojs/vercel`) con `bun run build`.
 
 Opcional (preview local):
 
@@ -101,9 +97,7 @@ Ejemplo:
 - Copiar `.env.example` a `.env` y ajustar valores reales.
 - Definir `PROMETHEUS_URL` y `PTERODACTYL_PANEL_URL` en el entorno.
 - Ejecutar build en CI (`bun run build`).
-- Levantar `node dist/server/entry.mjs` detrás de reverse proxy (Nginx/Caddy).
-- Habilitar HTTPS y headers de seguridad en el proxy.
-- Configurar monitoreo/logs del proceso (systemd, PM2, Docker healthcheck, etc.).
+- Confirmar variables de entorno también en Vercel Project Settings.
 
 ## Estructura principal
 
@@ -111,7 +105,7 @@ Ejemplo:
 - `src/pages/api/metrics.json.ts`: integración con Prometheus y armado del payload.
 - `src/components/metrics-dashboard.tsx`: UI del dashboard.
 - `src/components/metrics-dashboard.logic.tsx`: estado, fetch, filtros y ordenamiento.
-- `astro.config.mjs`: salida server + adapter de Node.
+- `astro.config.mjs`: salida server + adapter de Vercel.
 
 ## Ejemplo de variables
 

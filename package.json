@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
-    "@astrojs/node": "^9.5.4",
     "@astrojs/react": "^4.4.2",
+    "@astrojs/vercel": "^8.2.6",
     "@fortawesome/fontawesome-free": "^7.2.0",
     "@heroicons/react": "^2.2.0",
     "@tailwindcss/vite": "^4.1.18",
