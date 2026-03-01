@@ -1,0 +1,44 @@
+---
+import '../styles/global.css';
+import Footer from '../components/Footer.astro';
+import ModeToggle from '../components/ModeToggle';
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<title>Cluster Monitor</title>
+		<script is:inline>
+			const storageKey = 'theme';
+			const getThemePreference = () => {
+				if (typeof localStorage !== 'undefined') {
+					const storedTheme = localStorage.getItem(storageKey);
+					if (storedTheme === 'dark' || storedTheme === 'light') return storedTheme;
+				}
+				return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+			};
+			const isDark = getThemePreference() === 'dark';
+			document.documentElement.classList.toggle('dark', isDark);
+
+			if (typeof localStorage !== 'undefined') {
+				const observer = new MutationObserver(() => {
+					localStorage.setItem(storageKey, document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+				});
+				observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+			}
+		</script>
+	</head>
+	<body class="min-h-screen bg-background text-foreground antialiased">
+		<div class="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_12%_18%,rgba(255,255,255,0.13),transparent_30%),radial-gradient(circle_at_88%_5%,rgba(255,255,255,0.08),transparent_34%),radial-gradient(circle_at_52%_100%,rgba(255,255,255,0.1),transparent_42%)] dark:bg-[radial-gradient(circle_at_12%_18%,rgba(255,255,255,0.07),transparent_30%),radial-gradient(circle_at_88%_5%,rgba(255,255,255,0.04),transparent_34%),radial-gradient(circle_at_52%_100%,rgba(255,255,255,0.06),transparent_42%)]"></div>
+		<div class="fixed right-4 top-4 z-50">
+			<ModeToggle client:load />
+		</div>
+		<div class="relative min-h-screen overflow-x-hidden">
+			<slot />
+		</div>
+		<Footer />
+	</body>
+</html>
