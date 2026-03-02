@@ -2,15 +2,46 @@
 import '@/styles/global.css';
 import Footer from '@/components/Footer.astro';
 import ModeToggle from '@/components/ModeToggle';
+
+const pageTitle = 'Cluster Monitor | Status Page';
+const pageDescription = 'Monitorea el estado de nodos, contenedores y RAID en tiempo real desde un dashboard centralizado.';
+const canonicalUrl = Astro.url;
+const ogImageUrl = new URL('/favicon.svg', Astro.url).toString();
+const jsonLd = {
+	'@context': 'https://schema.org',
+	'@type': 'WebSite',
+	name: 'Cluster Monitor',
+	url: canonicalUrl.toString(),
+	description: pageDescription,
+	inLanguage: 'es',
+};
 ---
 
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
+		<meta name="description" content={pageDescription} />
+		<meta name="robots" content="index, follow" />
+		<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#f5f5f5" media="(prefers-color-scheme: dark)" />
+		<link rel="canonical" href={canonicalUrl.toString()} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<title>Cluster Monitor</title>
+		<title>{pageTitle}</title>
+
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="Cluster Monitor" />
+		<meta property="og:title" content={pageTitle} />
+		<meta property="og:description" content={pageDescription} />
+		<meta property="og:url" content={canonicalUrl.toString()} />
+		<meta property="og:image" content={ogImageUrl} />
+
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:title" content={pageTitle} />
+		<meta name="twitter:description" content={pageDescription} />
+		<meta name="twitter:image" content={ogImageUrl} />
+
+		<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 		<script is:inline>
 			const storageKey = 'theme';
 			const getThemePreference = () => {

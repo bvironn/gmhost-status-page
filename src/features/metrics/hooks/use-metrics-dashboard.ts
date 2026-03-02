@@ -1,61 +1,13 @@
-<<<<<<< HEAD
 import { useEffect, useMemo, useState } from 'react';
-import type { ContainerSortOption as ContainerSort, MetricsPayload as MetricsData } from '../lib/types/metrics';
-
+import {
+  type ContainerSort,
+  type MetricsData,
+} from '@/features/metrics/model/contracts';
+import { compareNodeName } from '@/features/metrics/model/node-order';
+import { formatSnapshotParam } from '@/features/metrics/model/snapshot';
 
 const REFRESH_MS = 15000;
 
-const parseNodeOrder = (value: string): { prefix: string; base: number | null; variant: number | null; hasVariant: boolean } => {
-  const normalized = value.trim();
-  const match = normalized.match(/^(.*?)(\d+)(?:\.(\d+))?$/);
-  if (!match) {
-    return { prefix: normalized.toLowerCase(), base: null, variant: null, hasVariant: false };
-  }
-
-  const [, rawPrefix, rawBase, rawVariant] = match;
-  return {
-    prefix: rawPrefix.toLowerCase(),
-    base: Number(rawBase),
-    variant: rawVariant ? Number(rawVariant) : null,
-    hasVariant: rawVariant !== undefined,
-  };
-};
-
-const compareNodeName = (left: string, right: string): number => {
-  const a = parseNodeOrder(left);
-  const b = parseNodeOrder(right);
-
-  if (a.prefix !== b.prefix) return a.prefix.localeCompare(b.prefix);
-  if (a.hasVariant !== b.hasVariant) return a.hasVariant ? 1 : -1;
-
-  if (a.base !== null && b.base !== null && a.base !== b.base) return a.base - b.base;
-  if (a.variant !== null && b.variant !== null && a.variant !== b.variant) return a.variant - b.variant;
-
-  return left.localeCompare(right);
-};
-
-const formatSnapshotParam = (value: string): string | null => {
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-
-  const match = trimmed.match(/^(\d{2})(\d{2})(\d{4})[\sT]?(\d{2})(\d{2})(\d{2})$/);
-  if (!match) return null;
-
-  const [, dd, mm, yyyy, HH, MM, SS] = match;
-  const date = new Date(Date.UTC(Number(yyyy), Number(mm) - 1, Number(dd), Number(HH), Number(MM), Number(SS)));
-  if (
-    date.getUTCFullYear() !== Number(yyyy) ||
-    date.getUTCMonth() !== Number(mm) - 1 ||
-    date.getUTCDate() !== Number(dd) ||
-    date.getUTCHours() !== Number(HH) ||
-    date.getUTCMinutes() !== Number(MM) ||
-    date.getUTCSeconds() !== Number(SS)
-  ) {
-    return null;
-  }
-
-  return `${dd}${mm}${yyyy} ${HH}${MM}${SS}`;
-};
 
 export const formatBytes = (value: number): string => {
   if (!Number.isFinite(value) || value <= 0) return '0 B';
@@ -206,12 +158,3 @@ export function useMetricsDashboard() {
     hasSnapshot: Boolean(formatSnapshotParam(snapshotInput)),
   };
 }
-=======
-export {
-  formatBytes,
-  formatNumber,
-  formatPercent,
-  formatRate,
-  useMetricsDashboard,
-} from '@/features/metrics/hooks/use-metrics-dashboard';
->>>>>>> 51c4ec8 (refactor(metrics): modularize domain, slim API route, and add payload tests)

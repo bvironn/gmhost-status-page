@@ -11,26 +11,36 @@ Status page en Astro + TypeScript para monitorear nodos, contenedores y estado R
 
 ## Estructura del proyecto
 
-Fuente de verdad única en `src/` (Astro-first):
+Organización actual por capas y dominio:
 
 ```text
 src/
-  assets/
-  components/
+  features/
+    metrics/
+      hooks/
+      model/
+      server/       # queries de Prometheus + armado del payload
+      ui/
+  components/      # wrappers y componentes compartidos de app
   layouts/
   lib/
     types/
     webhooks/
   pages/
     api/
-      metrics.json.ts
-      webhooks/
+  playground/
+    shadcn-studio/ # ejemplos/sandbox, no código productivo
   styles/
 ```
 
 Notas:
+- `features/metrics/model` centraliza contratos y utilidades de orden/fechas para frontend y API.
+- `features/metrics/server` contiene primitivas de Prometheus y helpers server-side:
+`metrics-queries.ts` para batch de consultas y `metrics-payload.ts` como orquestador.
+- `features/metrics/server/payload` separa reglas por responsabilidad:
+`build-nodes.ts`, `build-raid-status.ts`, `build-containers-summary.ts`.
+- `src/pages/api/metrics.json.ts` queda como controlador delgado (parse request + orquestación).
 - `public/` se usa solo para estáticos servidos directamente.
-- No se usan carpetas duplicadas en raíz como `assets/`, `components/` o `app/`.
 
 ## Variables de entorno
 
@@ -48,6 +58,7 @@ El `package.json` expone:
 - `dev`: `astro dev --host`
 - `build`: `astro build`
 - `preview`: `astro preview --host`
+- `test`: `bun test`
 
 Con Bun:
 
@@ -55,6 +66,7 @@ Con Bun:
 bun install
 bun run dev
 bun run build
+bun run test
 ```
 
 ## API

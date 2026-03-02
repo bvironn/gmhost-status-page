@@ -1,6 +1,6 @@
 import { FacebookIcon, InstagramIcon, TwitterIcon, YoutubeIcon } from 'lucide-react';
 
-import Logo from '@/components/shadcn-studio/logo';
+import Logo from '@/playground/shadcn-studio/logo';
 
 const Footer = () => {
   return (
