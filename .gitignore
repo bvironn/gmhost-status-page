@@ -3,6 +3,9 @@ dist/
 .vercel/
 # generated types
 .astro/
+.pnpm-store/
+coverage/
+.cache/
 
 # dependencies
 node_modules/
