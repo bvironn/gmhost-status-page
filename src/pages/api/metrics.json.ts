@@ -1,24 +1,8 @@
 import type { APIRoute } from 'astro';
-<<<<<<< HEAD
-import type {
-  NodeMetrics as NodeEntry,
-  ContainerMetrics as ContainerEntry,
-  MetricsPayload,
-  ResourceStatus as RaidComponentStatus,
-  RaidComponent as RaidComponentEntry,
-  RaidIncident as RaidIncidentEntry
-} from '../../lib/types/metrics';
-
-type PromMetric = Record<string, string>;
-type PromResult = { metric: PromMetric; value: [number, string] };
-type PromResponse = { status: string; data?: { resultType: string; result: PromResult[] }; error?: string };
-
-=======
 import { parseRequestedAt } from '@/features/metrics/model/snapshot';
 import { fetchMetricsQueryResults } from '@/features/metrics/server/metrics-queries';
 import { buildMetricsPayload } from '@/features/metrics/server/metrics-payload';
 import { createPrometheusQueryRunner } from '@/features/metrics/server/prometheus';
->>>>>>> 51c4ec8 (refactor(metrics): modularize domain, slim API route, and add payload tests)
 
 const PROMETHEUS_URL = (import.meta.env.PROMETHEUS_URL as string | undefined)?.trim();
 const PANEL_BASE = (import.meta.env.PTERODACTYL_PANEL_URL as string | undefined)?.trim()?.replace(/\/$/, '');
