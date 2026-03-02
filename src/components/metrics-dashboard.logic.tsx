@@ -1,69 +1,49 @@
 import { useEffect, useMemo, useState } from 'react';
 
+export type ComponentStatus = 'operational' | 'degraded' | 'maintenance' | 'unknown';
+
 export type NodeEntry = {
   nodeName: string;
-  ip: string;
-  cpuTotalCores: number;
-  cpuUsedCores: number;
-  cpuFreeCores: number;
-  cpuUsagePercent: number;
-  hostCpuUsagePercent: number;
-  memoryTotalBytes: number;
-  memoryUsedBytes: number;
-  memoryFreeBytes: number;
-  memoryUsagePercent: number;
-  hostMemoryUsagePercent: number;
-  diskTotalBytes: number;
-  diskUsedBytes: number;
-  diskFreeBytes: number;
-  diskUsagePercent: number;
-  volumesTotalBytes: number | null;
-  volumesUsedBytes: number | null;
-  volumesFreeBytes: number | null;
-  volumesUsagePercent: number | null;
-  containerCount: number;
+  up: boolean;
+  stale: boolean;
+  lastSeenAt: string | null;
 };
 
-export type ContainerEntry = {
+export type ComponentEntry = {
   id: string;
+  name: string;
+  group: 'node' | 'raid' | 'disks';
   nodeName: string;
-  cpuPercent: number;
-  memoryBytes: number;
-  rxBytesPerSecond: number;
-  txBytesPerSecond: number;
-  panelUrl: string;
+  status: ComponentStatus;
+  detail: string;
+  lastSeenAt: string | null;
+};
+
+export type IncidentEntry = {
+  id: string;
+  title: string;
+  severity: 'critical' | 'warning';
+  status: 'open';
+  nodeName: string;
+  componentId: string;
+  startedAt: string;
+  detail: string;
 };
 
 export type MetricsData = {
   generatedAt: string;
   requestedAt: string | null;
-  nodes: NodeEntry[];
   summary: {
-    totalNodes: number;
-    totalContainers: number;
-    cpuTotalCores: number;
-    cpuUsedCores: number;
-    cpuFreeCores: number;
-    cpuUsagePercent: number;
-    memoryTotalBytes: number;
-    memoryUsedBytes: number;
-    memoryFreeBytes: number;
-    memoryUsagePercent: number;
-    diskTotalBytes: number;
-    diskUsedBytes: number;
-    diskFreeBytes: number;
-    diskUsagePercent: number;
+    total: number;
+    operational: number;
+    degraded: number;
+    maintenance: number;
+    unknown: number;
   };
-  containers: ContainerEntry[];
+  nodes: NodeEntry[];
+  components: ComponentEntry[];
+  incidents: IncidentEntry[];
 };
-
-export type ContainerSort =
-  | 'memory_desc'
-  | 'memory_asc'
-  | 'cpu_desc'
-  | 'cpu_asc'
-  | 'rx_desc'
-  | 'tx_desc';
 
 const REFRESH_MS = 15000;
 
@@ -90,30 +70,11 @@ const formatSnapshotParam = (value: string): string | null => {
   return `${dd}${mm}${yyyy} ${HH}${MM}${SS}`;
 };
 
-export const formatBytes = (value: number): string => {
-  if (!Number.isFinite(value) || value <= 0) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
-  let size = value;
-  let unit = 0;
-  while (size >= 1024 && unit < units.length - 1) {
-    size /= 1024;
-    unit += 1;
-  }
-  return `${size.toFixed(size >= 100 ? 0 : size >= 10 ? 1 : 2)} ${units[unit]}`;
-};
-
-export const formatRate = (value: number): string => `${formatBytes(value)}/s`;
-export const formatPercent = (value: number): string => `${value.toFixed(1)}%`;
-export const formatNumber = (value: number): string => value.toFixed(value >= 100 ? 0 : 0);
-
 export function useMetricsDashboard() {
   const [data, setData] = useState<MetricsData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedNode, setSelectedNode] = useState('all');
-  const [sortBy, setSortBy] = useState<ContainerSort>('memory_desc');
   const [snapshotInput, setSnapshotInput] = useState('');
 
   const loadData = async (silent = false, customSnapshot?: string) => {
@@ -127,7 +88,7 @@ export function useMetricsDashboard() {
       const payload = (await response.json()) as MetricsData & { error?: boolean; message?: string };
 
       if (!response.ok || payload.error) {
-        throw new Error(payload.message ?? 'No se pudo cargar métricas');
+        throw new Error(payload.message ?? 'No se pudieron cargar las métricas');
       }
 
       setData(payload);
@@ -150,56 +111,15 @@ export function useMetricsDashboard() {
     return () => clearInterval(id);
   }, [snapshotInput]);
 
-  const nodeOptions = useMemo(() => {
-    const names = new Set((data?.containers ?? []).map((container) => container.nodeName));
-    return ['all', ...Array.from(names).sort((a, b) => a.localeCompare(b))];
+  const componentsByGroup = useMemo(() => {
+    if (!data) return { node: [], raid: [], disks: [] } as Record<'node' | 'raid' | 'disks', ComponentEntry[]>;
+
+    return {
+      node: data.components.filter((item) => item.group === 'node'),
+      raid: data.components.filter((item) => item.group === 'raid'),
+      disks: data.components.filter((item) => item.group === 'disks'),
+    };
   }, [data]);
-
-  const filteredContainers = useMemo(() => {
-    if (!data) return [];
-
-    const query = searchTerm.trim().toLowerCase();
-    const filtered = data.containers.filter((container) => {
-      const nodeMatch = selectedNode === 'all' || container.nodeName === selectedNode;
-      const searchMatch =
-        query.length === 0 ||
-        container.id.toLowerCase().includes(query) ||
-        container.nodeName.toLowerCase().includes(query);
-      return nodeMatch && searchMatch;
-    });
-
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'memory_asc':
-          return a.memoryBytes - b.memoryBytes;
-        case 'cpu_desc':
-          return b.cpuPercent - a.cpuPercent;
-        case 'cpu_asc':
-          return a.cpuPercent - b.cpuPercent;
-        case 'rx_desc':
-          return b.rxBytesPerSecond - a.rxBytesPerSecond;
-        case 'tx_desc':
-          return b.txBytesPerSecond - a.txBytesPerSecond;
-        case 'memory_desc':
-        default:
-          return b.memoryBytes - a.memoryBytes;
-      }
-    });
-
-    return filtered.slice(0, 80);
-  }, [data, searchTerm, selectedNode, sortBy]);
-
-  const resetFilters = async () => {
-    const hadSnapshot = Boolean(formatSnapshotParam(snapshotInput));
-    setSearchTerm('');
-    setSelectedNode('all');
-    setSortBy('memory_desc');
-    setSnapshotInput('');
-
-    if (hadSnapshot) {
-      await loadData(false, '');
-    }
-  };
 
   const applySnapshot = async () => {
     const normalized = formatSnapshotParam(snapshotInput);
@@ -222,20 +142,12 @@ export function useMetricsDashboard() {
     error,
     loading,
     refreshing,
-    searchTerm,
-    selectedNode,
-    sortBy,
     snapshotInput,
-    nodeOptions,
-    filteredContainers,
-    setSearchTerm,
-    setSelectedNode,
-    setSortBy,
     setSnapshotInput,
     loadData,
-    resetFilters,
     applySnapshot,
     clearSnapshot,
     hasSnapshot: Boolean(formatSnapshotParam(snapshotInput)),
+    componentsByGroup,
   };
 }
