@@ -1,93 +1,17 @@
 import type { APIRoute } from 'astro';
+import type {
+  NodeMetrics as NodeEntry,
+  ContainerMetrics as ContainerEntry,
+  MetricsPayload,
+  ResourceStatus as RaidComponentStatus,
+  RaidComponent as RaidComponentEntry,
+  RaidIncident as RaidIncidentEntry
+} from '../../lib/types/metrics';
 
 type PromMetric = Record<string, string>;
 type PromResult = { metric: PromMetric; value: [number, string] };
 type PromResponse = { status: string; data?: { resultType: string; result: PromResult[] }; error?: string };
 
-type NodeEntry = {
-  nodeName: string;
-  ip: string;
-  nodeExporterInstance: string;
-  cadvisorInstance: string;
-  cpuTotalCores: number;
-  cpuUsedCores: number;
-  cpuFreeCores: number;
-  cpuUsagePercent: number;
-  hostCpuUsagePercent: number;
-  memoryTotalBytes: number;
-  memoryUsedBytes: number;
-  memoryFreeBytes: number;
-  memoryUsagePercent: number;
-  hostMemoryUsagePercent: number;
-  diskTotalBytes: number;
-  diskUsedBytes: number;
-  diskFreeBytes: number;
-  diskUsagePercent: number;
-  volumesTotalBytes: number | null;
-  volumesUsedBytes: number | null;
-  volumesFreeBytes: number | null;
-  volumesUsagePercent: number | null;
-  containerCount: number;
-};
-
-type ContainerEntry = {
-  id: string;
-  nodeName: string;
-  instance: string;
-  cpuPercent: number;
-  memoryBytes: number;
-  rxBytesPerSecond: number;
-  txBytesPerSecond: number;
-  panelUrl: string;
-};
-
-type MetricsPayload = {
-  generatedAt: string;
-  requestedAt: string | null;
-  nodes: NodeEntry[];
-  summary: {
-    totalNodes: number;
-    totalContainers: number;
-    cpuTotalCores: number;
-    cpuUsedCores: number;
-    cpuFreeCores: number;
-    cpuUsagePercent: number;
-    memoryTotalBytes: number;
-    memoryUsedBytes: number;
-    memoryFreeBytes: number;
-    memoryUsagePercent: number;
-    diskTotalBytes: number;
-    diskUsedBytes: number;
-    diskFreeBytes: number;
-    diskUsagePercent: number;
-  };
-  containers: ContainerEntry[];
-  raidStatus: {
-    components: RaidComponentEntry[];
-    incidents: RaidIncidentEntry[];
-  };
-};
-
-type RaidComponentStatus = 'operational' | 'degraded' | 'maintenance' | 'unknown';
-
-type RaidComponentEntry = {
-  id: string;
-  name: string;
-  nodeName: string;
-  kind: 'raid' | 'disks';
-  status: RaidComponentStatus;
-  detail: string;
-  lastSeenAt: string | null;
-};
-
-type RaidIncidentEntry = {
-  id: string;
-  nodeName: string;
-  severity: 'critical' | 'warning';
-  title: string;
-  detail: string;
-  startedAt: string;
-};
 
 const PROMETHEUS_URL = (import.meta.env.PROMETHEUS_URL as string | undefined)?.trim();
 const PANEL_BASE = (import.meta.env.PTERODACTYL_PANEL_URL as string | undefined)?.trim()?.replace(/\/$/, '');

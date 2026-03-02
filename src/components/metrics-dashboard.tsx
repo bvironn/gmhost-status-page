@@ -11,13 +11,13 @@ import {
 } from '@heroicons/react/24/outline';
 import { CalendarIcon } from 'lucide-react';
 import {
-  type ContainerSort,
   formatBytes,
   formatNumber,
   formatPercent,
   formatRate,
   useMetricsDashboard,
 } from './metrics-dashboard.logic';
+import type { ContainerSortOption as ContainerSort, ResourceStatus } from '../lib/types/metrics';
 import { Button as UiButton } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -54,14 +54,14 @@ const StatCard = ({
   </article>
 );
 
-const raidStatusBadgeClass = (status: 'operational' | 'degraded' | 'maintenance' | 'unknown') => {
+const raidStatusBadgeClass = (status: ResourceStatus) => {
   if (status === 'operational') return 'border-emerald-300/70 bg-emerald-100 text-emerald-700 dark:border-emerald-300/25 dark:bg-emerald-400/10 dark:text-emerald-300';
   if (status === 'degraded') return 'border-red-300/70 bg-red-100 text-red-700 dark:border-red-300/25 dark:bg-red-400/10 dark:text-red-300';
   if (status === 'maintenance') return 'border-amber-300/70 bg-amber-100 text-amber-700 dark:border-amber-300/25 dark:bg-amber-400/10 dark:text-amber-300';
   return 'border-slate-300/70 bg-slate-100 text-slate-700 dark:border-slate-300/25 dark:bg-slate-400/10 dark:text-slate-300';
 };
 
-const raidStatusLabel = (status: 'operational' | 'degraded' | 'maintenance' | 'unknown') => {
+const raidStatusLabel = (status: ResourceStatus) => {
   if (status === 'operational') return 'Operational';
   if (status === 'degraded') return 'Degraded';
   if (status === 'maintenance') return 'Maintenance';
@@ -171,13 +171,13 @@ export default function MetricsDashboard() {
           )}
           <div className="flex flex-wrap items-center justify-end gap-2">
             {hasSnapshot && (
-                <button
-                  type="button"
-                  onClick={() => void clearSnapshot()}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-border/70 bg-primary px-4 py-2 text-sm text-primary-foreground transition hover:opacity-90"
-                >
-                  <i className="fa-solid fa-bolt text-xs" aria-hidden="true" />
-                  Ahora
+              <button
+                type="button"
+                onClick={() => void clearSnapshot()}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border/70 bg-primary px-4 py-2 text-sm text-primary-foreground transition hover:opacity-90"
+              >
+                <i className="fa-solid fa-bolt text-xs" aria-hidden="true" />
+                Ahora
               </button>
             )}
             <button
