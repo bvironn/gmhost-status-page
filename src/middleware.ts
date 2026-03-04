@@ -1,14 +1,26 @@
 import { defineMiddleware } from 'astro:middleware';
 import { getSessionCookieName, isSessionTokenValid } from '@/lib/auth';
 
-const PUBLIC_PATHS = new Set(['/login', '/api/auth/login', '/api/auth/logout', '/api/webhooks']);
+const PUBLIC_PATHS = new Set([
+  '/login',
+  '/api/auth/login',
+  '/api/auth/logout',
+  '/api/webhooks',
+  '/favicon.svg',
+  '/robots.txt',
+  '/sitemap.xml',
+]);
 
-const isProtectedPath = (pathname: string) => pathname === '/' || pathname === '/api/metrics.json';
+const isPublicPath = (pathname: string) => {
+  if (PUBLIC_PATHS.has(pathname)) return true;
+  if (pathname.startsWith('/_astro/')) return true;
+  return /\.[a-z0-9]+$/i.test(pathname);
+};
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
 
-  if (PUBLIC_PATHS.has(pathname) || !isProtectedPath(pathname)) {
+  if (isPublicPath(pathname)) {
     return next();
   }
 
