@@ -48,8 +48,16 @@ Definir en `.env`:
 
 - `PROMETHEUS_URL` (obligatoria), ejemplo: `http://prometheus:9090`
 - `PTERODACTYL_PANEL_URL` (obligatoria para links de panel)
+- `AUTH_PASSWORD` (obligatoria para iniciar sesión)
+- `AUTH_SECRET` (obligatoria para firmar la cookie de sesión; usar un valor largo y aleatorio)
 
 Puedes copiar `.env.example` como base.
+
+## Seguridad / Login
+
+- La ruta `/` y el endpoint `GET /api/metrics.json` están protegidos por sesión.
+- El login vive en `/login` y valida contra `AUTH_PASSWORD`.
+- La sesión usa una cookie `HttpOnly` firmada con `AUTH_SECRET` y expira en 12 horas.
 
 ## Scripts
 

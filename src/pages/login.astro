@@ -1,0 +1,53 @@
+---
+import Layout from '@/layouts/Main.astro';
+import { getSessionCookieName, isAuthConfigured, isSessionTokenValid } from '@/lib/auth';
+
+const configured = isAuthConfigured();
+const sessionCookie = Astro.cookies.get(getSessionCookieName())?.value;
+if (isSessionTokenValid(sessionCookie)) {
+  return Astro.redirect('/');
+}
+
+const hasError = Astro.url.searchParams.get('error') === '1';
+---
+
+<Layout>
+  <main class="mx-auto flex min-h-[calc(100vh-10rem)] w-full max-w-md items-center px-4 py-12">
+    <section class="w-full rounded-xl border border-border bg-card/95 p-6 shadow-lg sm:p-8">
+      <h1 class="text-2xl font-semibold tracking-tight">Acceso restringido</h1>
+      <p class="mt-2 text-sm text-muted-foreground">
+        Inicia sesión para ver el dashboard de estado del clúster.
+      </p>
+
+      {!configured ? (
+        <p class="mt-6 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          Falta configurar <code>AUTH_PASSWORD</code> y/o <code>AUTH_SECRET</code> en el entorno.
+        </p>
+      ) : (
+        <form method="post" action="/api/auth/login" class="mt-6 space-y-4">
+          <label class="block text-sm font-medium text-foreground" for="password">Contraseña</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autocomplete="current-password"
+            class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-0 placeholder:text-muted-foreground focus:border-ring"
+            placeholder="Ingresa la contraseña"
+          />
+
+          {hasError ? (
+            <p class="text-sm text-destructive">Contraseña inválida.</p>
+          ) : null}
+
+          <button
+            type="submit"
+            class="inline-flex w-full items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+          >
+            Iniciar sesión
+          </button>
+        </form>
+      )}
+    </section>
+  </main>
+</Layout>

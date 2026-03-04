@@ -4,5 +4,15 @@ import MetricsDashboard from '@/components/MetricsDashboard.astro';
 ---
 
 <Layout>
+  <div class="mx-auto flex w-full max-w-7xl justify-end px-4 pt-6 sm:px-6 lg:px-8">
+    <form method="post" action="/api/auth/logout">
+      <button
+        type="submit"
+        class="inline-flex items-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
+      >
+        Cerrar sesión
+      </button>
+    </form>
+  </div>
   <MetricsDashboard />
 </Layout>
